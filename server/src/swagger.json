@@ -1,0 +1,1033 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Aerocode Aircraft Production Management API",
+    "description": "API completa e robusta para o gerenciamento do processo de fabricação de aeronaves da Aerocode. Desenvolvido para a atividade AV3 de Programação Orientada a Objetos (POO).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Rafael Matesco",
+      "email": "matesconitro@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor de Desenvolvimento Local"
+    }
+  ],
+  "paths": {
+    "/aeronaves": {
+      "get": {
+        "summary": "Listar todas as aeronaves",
+        "description": "Retorna uma lista com todas as aeronaves cadastradas, incluindo suas peças, etapas de produção (com funcionários) e testes realizados.",
+        "responses": {
+          "200": {
+            "description": "Lista de aeronaves retornada com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AeronaveCompleta"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Cadastrar uma nova aeronave",
+        "description": "Cria um novo registro de aeronave no banco de dados.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AeronaveInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Aeronave cadastrada com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aeronave"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados incompletos ou inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Aeronave com código especificado já existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aeronaves/{codigo}": {
+      "get": {
+        "summary": "Obter detalhes de uma aeronave",
+        "description": "Retorna os detalhes de uma aeronave específica buscando pelo seu código identificador único.",
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "description": "Código da aeronave (Ex: AC-001)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Aeronave encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AeronaveCompleta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aeronave não encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar dados de uma aeronave",
+        "description": "Atualiza campos como modelo, tipo, capacidade ou alcance de uma aeronave.",
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "description": "Código da aeronave a ser atualizada",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "modelo": { "type": "string" },
+                  "tipo": { "$ref": "#/components/schemas/TipoAeronave" },
+                  "capacidade": { "type": "integer" },
+                  "alcance": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Aeronave atualizada com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aeronave"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro ao atualizar aeronave.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aeronave não encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir uma aeronave",
+        "description": "Remove uma aeronave do banco de dados (também exclui em cascata os testes e dependências vinculados).",
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "description": "Código da aeronave a ser excluída",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Aeronave excluída com sucesso."
+          },
+          "404": {
+            "description": "Aeronave não encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/funcionarios": {
+      "get": {
+        "summary": "Listar todos os funcionários",
+        "description": "Retorna uma lista com todos os funcionários cadastrados no sistema (senhas são omitidas na serialização JSON por segurança).",
+        "responses": {
+          "200": {
+            "description": "Lista de funcionários.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Funcionario"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor."
+          }
+        }
+      },
+      "post": {
+        "summary": "Cadastrar um novo funcionário",
+        "description": "Cria um novo funcionário com determinado nível de permissão.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FuncionarioInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Funcionário cadastrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Funcionario"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados incorretos ou incompletos."
+          },
+          "409": {
+            "description": "Já existe funcionário com o mesmo ID ou nome de usuário já em uso."
+          }
+        }
+      }
+    },
+    "/funcionarios/setup-required": {
+      "get": {
+        "summary": "Verificar se o sistema precisa do primeiro setup",
+        "description": "Retorna verdadeiro se não existirem funcionários no banco de dados, indicando que o primeiro administrador precisa ser criado.",
+        "responses": {
+          "200": {
+            "description": "Estado do setup verificado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "setupRequired": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/funcionarios/login": {
+      "post": {
+        "summary": "Autenticar um funcionário",
+        "description": "Verifica as credenciais fornecidas (usuario e senha). Se corretas, retorna as informações do funcionário.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["usuario", "senha"],
+                "properties": {
+                  "usuario": { "type": "string" },
+                  "senha": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Autenticado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Funcionario"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuário ou senha incorretos."
+          }
+        }
+      }
+    },
+    "/funcionarios/{id}": {
+      "get": {
+        "summary": "Obter detalhes do funcionário",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Funcionario" }
+              }
+            }
+          },
+          "404": { "description": "Funcionário não encontrado." }
+        }
+      },
+      "put": {
+        "summary": "Atualizar funcionário",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string" },
+                  "telefone": { "type": "string" },
+                  "endereco": { "type": "string" },
+                  "usuario": { "type": "string" },
+                  "senha": { "type": "string" },
+                  "nivelPermissao": { "$ref": "#/components/schemas/NivelPermissao" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Funcionario" }
+              }
+            }
+          },
+          "404": { "description": "Funcionário não encontrado." },
+          "409": { "description": "Nome de usuário já em uso." }
+        }
+      },
+      "delete": {
+        "summary": "Excluir funcionário",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Funcionário excluído." },
+          "404": { "description": "Funcionário não encontrado." }
+        }
+      }
+    },
+    "/pecas": {
+      "get": {
+        "summary": "Listar todas as peças",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Peca" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Cadastrar uma peça em uma aeronave",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PecaInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Peca" }
+              }
+            }
+          },
+          "400": { "description": "Campos vazios ou aeronave não encontrada." },
+          "409": { "description": "Já existe uma peça com este nome." }
+        }
+      }
+    },
+    "/pecas/{nome}": {
+      "get": {
+        "summary": "Obter detalhes de uma peça",
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Peca" }
+              }
+            }
+          },
+          "404": { "description": "Peça não encontrada." }
+        }
+      },
+      "put": {
+        "summary": "Atualizar peça",
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tipo": { "$ref": "#/components/schemas/TipoPeca" },
+                  "prazo": { "type": "string" },
+                  "fornecedor": { "type": "string" },
+                  "status": { "$ref": "#/components/schemas/StatusPeca" },
+                  "aeronaveCodigo": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Peca" }
+              }
+            }
+          },
+          "404": { "description": "Peça não encontrada." }
+        }
+      },
+      "delete": {
+        "summary": "Excluir peça",
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Peça excluída." },
+          "404": { "description": "Peça não encontrada." }
+        }
+      }
+    },
+    "/etapas": {
+      "get": {
+        "summary": "Listar todas as etapas",
+        "description": "Retorna as etapas juntamente com a lista de funcionários associados a cada uma.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/EtapaCompleta" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar uma nova etapa para uma aeronave",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EtapaInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EtapaCompleta" }
+              }
+            }
+          },
+          "400": { "description": "Parâmetros incorretos ou aeronave não encontrada. Obs: Não é possível criar uma etapa como CONCLUIDA diretamente (deve começar como PENDENTE ou ANDAMENTO)." },
+          "409": { "description": "Etapa com este nome já existe." }
+        }
+      }
+    },
+    "/etapas/{nome}": {
+      "get": {
+        "summary": "Obter detalhes de uma etapa",
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EtapaCompleta" }
+              }
+            }
+          },
+          "404": { "description": "Etapa não encontrada." }
+        }
+      },
+      "put": {
+        "summary": "Atualizar etapa (atualização de status e prazo)",
+        "description": "Permite alterar o status de produção da etapa. Regras críticas aplicadas:\n1. Alterar para 'CONCLUIDA' exige que a etapa possua pelo menos um funcionário associado.\n2. Alterar para 'CONCLUIDA' exige que a etapa cronológica anterior (da mesma aeronave, ordenada pelo prazo) já esteja com status 'CONCLUIDA'.",
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "$ref": "#/components/schemas/StatusEtapa" },
+                  "prazo": { "type": "string" },
+                  "aeronaveCodigo": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EtapaCompleta" }
+              }
+            }
+          },
+          "400": { "description": "Violação de regras de negócio (sem funcionários ou etapa anterior pendente)." },
+          "404": { "description": "Etapa não encontrada." }
+        }
+      },
+      "delete": {
+        "summary": "Excluir etapa",
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Etapa excluída." },
+          "404": { "description": "Etapa não encontrada." }
+        }
+      }
+    },
+    "/etapas/{nome}/funcionarios": {
+      "post": {
+        "summary": "Associar um funcionário a uma etapa",
+        "description": "Vincula um funcionário a uma etapa específica para que ela possa ser executada e concluída.",
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "path",
+            "required": true,
+            "description": "Nome da etapa",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["funcionarioId"],
+                "properties": {
+                  "funcionarioId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Funcionário associado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EtapaCompleta" }
+              }
+            }
+          },
+          "404": { "description": "Etapa ou funcionário não encontrado." },
+          "409": { "description": "Funcionário já está associado a esta etapa." }
+        }
+      }
+    },
+    "/testes": {
+      "get": {
+        "summary": "Listar todos os testes",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Teste" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Registrar um teste para uma aeronave",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TesteInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Teste" }
+              }
+            }
+          },
+          "400": { "description": "Campos inválidos ou aeronave não encontrada." }
+        }
+      }
+    },
+    "/testes/{id}": {
+      "get": {
+        "summary": "Obter teste por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Teste" }
+              }
+            }
+          },
+          "404": { "description": "Teste não encontrado." }
+        }
+      },
+      "put": {
+        "summary": "Atualizar resultado do teste",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tipo": { "$ref": "#/components/schemas/TipoTeste" },
+                  "resultado": { "$ref": "#/components/schemas/ResultadoTeste" },
+                  "aeronaveCodigo": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Teste" }
+              }
+            }
+          },
+          "404": { "description": "Teste não encontrado." }
+        }
+      },
+      "delete": {
+        "summary": "Excluir teste",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Teste excluído." },
+          "404": { "description": "Teste não encontrado." }
+        }
+      }
+    },
+    "/relatorios": {
+      "post": {
+        "summary": "Gerar relatório de produção da aeronave",
+        "description": "Monta um relatório detalhado do estado de fabricação da aeronave no formato JSON ou HTML.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["aeronaveCodigo", "cliente", "dataEntrega"],
+                "properties": {
+                  "aeronaveCodigo": { "type": "string", "example": "AC-001" },
+                  "cliente": { "type": "string", "example": "LATAM Airlines" },
+                  "dataEntrega": { "type": "string", "example": "15/06/2026" },
+                  "formato": { "type": "string", "enum": ["json", "html"], "default": "json" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Relatório gerado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "titulo": { "type": "string" },
+                    "cliente": { "type": "string" },
+                    "dataEntrega": { "type": "string" },
+                    "detalhesAeronave": { "type": "object" }
+                  }
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "example": "<div><h1>Relatório de Entrega - Aeronave AC-001</h1>...</div>"
+                }
+              }
+            }
+          },
+          "404": { "description": "Aeronave não encontrada." }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Erro": {
+        "type": "object",
+        "properties": {
+          "erro": { "type": "string" }
+        }
+      },
+      "TipoAeronave": {
+        "type": "string",
+        "enum": ["COMERCIAL", "MILITAR"]
+      },
+      "TipoPeca": {
+        "type": "string",
+        "enum": ["NACIONAL", "IMPORTADA"]
+      },
+      "StatusPeca": {
+        "type": "string",
+        "enum": ["EM_PRODUCAO", "EM_TRANSPORTE", "PRONTA"]
+      },
+      "StatusEtapa": {
+        "type": "string",
+        "enum": ["PENDENTE", "ANDAMENTO", "CONCLUIDA"]
+      },
+      "NivelPermissao": {
+        "type": "string",
+        "enum": ["ADMINISTRADOR", "ENGENHEIRO", "OPERADOR"]
+      },
+      "TipoTeste": {
+        "type": "string",
+        "enum": ["ELETRICO", "HIDRAULICO", "AERODINAMICO"]
+      },
+      "ResultadoTeste": {
+        "type": "string",
+        "enum": ["APROVADO", "REPROVADO"]
+      },
+      "Aeronave": {
+        "type": "object",
+        "properties": {
+          "codigo": { "type": "string" },
+          "modelo": { "type": "string" },
+          "tipo": { "$ref": "#/components/schemas/TipoAeronave" },
+          "capacidade": { "type": "integer" },
+          "alcance": { "type": "integer" }
+        }
+      },
+      "AeronaveInput": {
+        "type": "object",
+        "required": ["codigo", "modelo", "tipo", "capacidade", "alcance"],
+        "properties": {
+          "codigo": { "type": "string", "example": "AC-001" },
+          "modelo": { "type": "string", "example": "Boeing 737" },
+          "tipo": { "$ref": "#/components/schemas/TipoAeronave" },
+          "capacidade": { "type": "integer", "example": 180 },
+          "alcance": { "type": "integer", "example": 6500 }
+        }
+      },
+      "AeronaveCompleta": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Aeronave" },
+          {
+            "type": "object",
+            "properties": {
+              "progresso": { "type": "integer", "description": "Porcentagem de progresso de conclusão da produção" },
+              "aprovada": { "type": "boolean", "description": "Retorna true se a aeronave passou em todos os testes" },
+              "pecas": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Peca" }
+              },
+              "etapas": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/EtapaCompleta" }
+              },
+              "testes": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Teste" }
+              }
+            }
+          }
+        ]
+      },
+      "Funcionario": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "nome": { "type": "string" },
+          "telefone": { "type": "string" },
+          "endereco": { "type": "string" },
+          "usuario": { "type": "string" },
+          "nivelPermissao": { "$ref": "#/components/schemas/NivelPermissao" }
+        }
+      },
+      "FuncionarioInput": {
+        "type": "object",
+        "required": ["id", "nome", "telefone", "endereco", "usuario", "senha", "nivelPermissao"],
+        "properties": {
+          "id": { "type": "string", "example": "m1" },
+          "nome": { "type": "string", "example": "Lucas Silva" },
+          "telefone": { "type": "string", "example": "(12) 99999-8888" },
+          "endereco": { "type": "string", "example": "Rua das Flores, 123" },
+          "usuario": { "type": "string", "example": "lucas.silva" },
+          "senha": { "type": "string", "example": "minhasenha123" },
+          "nivelPermissao": { "$ref": "#/components/schemas/NivelPermissao" }
+        }
+      },
+      "Peca": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string" },
+          "tipo": { "$ref": "#/components/schemas/TipoPeca" },
+          "prazo": { "type": "string" },
+          "fornecedor": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/StatusPeca" },
+          "aeronaveCodigo": { "type": "string", "nullable": true }
+        }
+      },
+      "PecaInput": {
+        "type": "object",
+        "required": ["nome", "tipo", "prazo", "fornecedor", "status", "aeronaveCodigo"],
+        "properties": {
+          "nome": { "type": "string", "example": "Trem de Pouso Principal" },
+          "tipo": { "$ref": "#/components/schemas/TipoPeca" },
+          "prazo": { "type": "string", "example": "2026-07-20" },
+          "fornecedor": { "type": "string", "example": "AeroParts Ltda." },
+          "status": { "$ref": "#/components/schemas/StatusPeca" },
+          "aeronaveCodigo": { "type": "string", "example": "AC-001" }
+        }
+      },
+      "Etapa": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/StatusEtapa" },
+          "prazo": { "type": "string" },
+          "aeronaveCodigo": { "type": "string", "nullable": true }
+        }
+      },
+      "EtapaInput": {
+        "type": "object",
+        "required": ["nome", "status", "prazo", "aeronaveCodigo"],
+        "properties": {
+          "nome": { "type": "string", "example": "Instalação da Turbina" },
+          "status": { "$ref": "#/components/schemas/StatusEtapa" },
+          "prazo": { "type": "string", "example": "2026-08-05" },
+          "aeronaveCodigo": { "type": "string", "example": "AC-001" }
+        }
+      },
+      "EtapaCompleta": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Etapa" },
+          {
+            "type": "object",
+            "properties": {
+              "funcionarios": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Funcionario" }
+              }
+            }
+          }
+        ]
+      },
+      "Teste": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "tipo": { "$ref": "#/components/schemas/TipoTeste" },
+          "resultado": { "$ref": "#/components/schemas/ResultadoTeste" },
+          "aeronaveCodigo": { "type": "string" }
+        }
+      },
+      "TesteInput": {
+        "type": "object",
+        "required": ["tipo", "resultado", "aeronaveCodigo"],
+        "properties": {
+          "tipo": { "$ref": "#/components/schemas/TipoTeste" },
+          "resultado": { "$ref": "#/components/schemas/ResultadoTeste" },
+          "aeronaveCodigo": { "type": "string", "example": "AC-001" }
+        }
+      }
+    }
+  }
+}

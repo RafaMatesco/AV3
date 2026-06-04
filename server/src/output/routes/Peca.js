@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const Peca_1 = require("../controllers/Peca");
+const router = (0, express_1.Router)();
+const controller = new Peca_1.PecaController();
+router.post('/pecas', controller.criar);
+router.get('/pecas', controller.listar);
+router.get('/pecas/:nome', controller.obterPorNome);
+router.put('/pecas/:nome', controller.atualizar);
+router.delete('/pecas/:nome', controller.excluir);
+exports.default = router;

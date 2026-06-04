@@ -1,0 +1,96 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+enum TipoAeronave {
+    COMERCIAL
+    MILITAR
+}
+
+enum TipoPeca {
+    NACIONAL
+    IMPORTADA
+}
+
+enum StatusPeca {
+    EM_PRODUCAO
+    EM_TRANSPORTE
+    PRONTA
+}
+
+enum StatusEtapa {
+    PENDENTE
+    ANDAMENTO
+    CONCLUIDA
+}
+
+enum NivelPermissao {
+    ADMINISTRADOR
+    ENGENHEIRO
+    OPERADOR
+}
+
+enum TipoTeste {
+    ELETRICO
+    HIDRAULICO
+    AERODINAMICO
+}
+
+enum ResultadoTeste {
+    APROVADO
+    REPROVADO
+}
+
+model Aeronave {
+    codigo     String       @id
+    modelo     String
+    tipo       TipoAeronave
+    capacidade Int
+    alcance    Int
+    pecas      Peca[]
+    etapas     Etapa[]
+    testes     Teste[]
+}
+
+model Peca {
+    nome           String     @id
+    tipo           TipoPeca
+    prazo          String?
+    fornecedor     String?
+    status         StatusPeca
+    aeronaveCodigo String?
+    aeronave       Aeronave?  @relation(fields: [aeronaveCodigo], references: [codigo])
+}
+
+model Etapa {
+    nome           String        @id
+    status         StatusEtapa
+    prazo          String?
+    aeronaveCodigo String?
+    aeronave       Aeronave?     @relation(fields: [aeronaveCodigo], references: [codigo])
+    funcionarios   Funcionario[]
+}
+
+model Funcionario {
+    id             Int            @id @default(autoincrement())
+    nome           String
+    telefone       String?
+    endereco       String?
+    usuario        String         @unique
+    senha          String
+    nivelPermissao NivelPermissao
+    etapas         Etapa[]
+}
+
+model Teste {
+    id             Int            @id @default(autoincrement())
+    tipo           TipoTeste
+    resultado      ResultadoTeste
+    aeronaveCodigo String
+    aeronave       Aeronave       @relation(fields: [aeronaveCodigo], references: [codigo], onDelete: Cascade)
+}

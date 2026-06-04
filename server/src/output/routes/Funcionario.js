@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const Funcionario_1 = require("../controllers/Funcionario");
+const router = (0, express_1.Router)();
+const controller = new Funcionario_1.FuncionarioController();
+router.post('/funcionarios', controller.criar);
+router.get('/funcionarios', controller.listar);
+router.get('/funcionarios/setup-required', controller.setupRequired);
+router.post('/funcionarios/login', controller.login);
+router.get('/funcionarios/:id', controller.obterPorId);
+router.put('/funcionarios/:id', controller.atualizar);
+router.delete('/funcionarios/:id', controller.excluir);
+exports.default = router;

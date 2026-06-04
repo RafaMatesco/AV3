@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const Etapa_1 = require("../controllers/Etapa");
+const router = (0, express_1.Router)();
+const controller = new Etapa_1.EtapaController();
+router.post('/etapas', controller.criar);
+router.get('/etapas', controller.listar);
+router.get('/etapas/:nome', controller.obterPorNome);
+router.put('/etapas/:nome', controller.atualizar);
+router.post('/etapas/:nome/funcionarios', controller.associarFuncionario);
+router.delete('/etapas/:nome', controller.excluir);
+exports.default = router;
