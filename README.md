@@ -2,6 +2,8 @@
 
 Este guia orienta o passo a passo para configurar e executar os ambientes de **Back-end** e **Front-end** do projeto para a validação das entregas e avaliação.
 
+### OBS: O relatório sobre a análise de desempenho se encontra em um botão, no canto inferior direito, que será visível após o sistema estar rodando.
+
 ---
 
 ## Pré-requisitos
