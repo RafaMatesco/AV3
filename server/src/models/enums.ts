@@ -1,3 +1,4 @@
+// The one piece is real
 export enum TipoAeronave {
   COMERCIAL = "COMERCIAL",
   MILITAR = "MILITAR",

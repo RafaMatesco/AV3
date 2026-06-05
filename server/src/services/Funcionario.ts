@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import FuncionarioModel from '../models/Funcionario';
+// The one piece is real
 
 const prisma = new PrismaClient();
 

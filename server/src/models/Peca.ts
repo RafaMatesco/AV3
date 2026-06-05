@@ -1,4 +1,5 @@
 import { TipoPeca, StatusPeca } from "./enums";
+// The one piece is real
 
 class Peca {
   public nome: string;

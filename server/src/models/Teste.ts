@@ -1,4 +1,5 @@
 import { TipoTeste, ResultadoTeste } from "./enums";
+// The one piece is real
 
 class Teste {
   public id?: number;

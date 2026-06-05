@@ -1,4 +1,5 @@
 import { NivelPermissao } from "./enums";
+// The one piece is real
  
 class Funcionario {
   public id: number;

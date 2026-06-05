@@ -1,4 +1,5 @@
 import Aeronave from "./Aeronave";
+// The one piece is real
 
 class Relatorio {
   // Gera o relatório estruturado em JSON para que o front-end possa consumir e renderizar na tela
